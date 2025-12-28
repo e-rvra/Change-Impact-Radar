@@ -1,0 +1,48 @@
+name: Change Impact Radar
+description: Comment PRs with an Impact Score (0-100) based on structural amplification vs size.
+author: ErvraTech
+
+inputs:
+  github_token:
+    description: GitHub token with permission to read PR files and create/update PR comments.
+    required: true
+  max_depth:
+    description: Max BFS depth for dependency reach.
+    required: false
+    default: "4"
+  max_files:
+    description: Max repository files to scan when building dependency graph.
+    required: false
+    default: "5000"
+  include_globs:
+    description: Comma-separated globs to include (optional). Example: "src/**,lib/**"
+    required: false
+    default: ""
+  exclude_globs:
+    description: Comma-separated globs to exclude. Example: "dist/**,build/**,**/*.min.js"
+    required: false
+    default: "node_modules/**,dist/**,build/**,.git/**,**/*.min.js,**/*.map,**/*.lock"
+  hotspot_paths:
+    description: Comma-separated path prefixes treated as critical. Example: "src/core,src/backend,lib"
+    required: false
+    default: "src/core,src/backend,lib"
+  comment_mode:
+    description: "update (default) updates the same comment; recreate always posts a new one."
+    required: false
+    default: "update"
+  fail_on_high:
+    description: "If true, fail the action when verdict is 🔴."
+    required: false
+    default: "false"
+  debug:
+    description: Enable verbose logs.
+    required: false
+    default: "false"
+
+runs:
+  using: node20
+  main: dist/index.js
+
+branding:
+  icon: radar
+  color: purple

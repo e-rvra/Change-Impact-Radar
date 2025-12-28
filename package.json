@@ -1,0 +1,23 @@
+{
+  "name": "change-impact-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub Action that comments PRs with Impact Score based on size and structural dependency reach.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.ts -o dist -m",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "fast-glob": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@vercel/ncc": "^0.38.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
