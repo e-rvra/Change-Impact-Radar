@@ -1,0 +1,32 @@
+import { describe, it, expect } from "vitest";
+import { parsePythonImports, parseJsImports } from "../src/parsers";
+
+describe("parsers", () => {
+  it("parses python imports", () => {
+    const s = `
+import os
+import a.b.c
+from x.y import z
+from ..pkg import thing
+`;
+    const out = parsePythonImports(s);
+    expect(out).toContain("os");
+    expect(out).toContain("a.b.c");
+    expect(out).toContain("x.y");
+    expect(out).toContain("..pkg");
+  });
+
+  it("parses js imports", () => {
+    const s = `
+import x from "react"
+import {y} from "./mod"
+export * from "../core"
+const z = require("./x")
+`;
+    const out = parseJsImports(s);
+    expect(out).toContain("react");
+    expect(out).toContain("./mod");
+    expect(out).toContain("../core");
+    expect(out).toContain("./x");
+  });
+});
