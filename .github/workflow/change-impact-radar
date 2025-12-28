@@ -1,0 +1,27 @@
+name: Change Impact Radar
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  impact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Change Impact Radar
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          max_depth: "4"
+          max_files: "5000"
+          exclude_globs: "node_modules/**,dist/**,build/**,.git/**"
+          hotspot_paths: "src/core,src/backend,lib"
+          comment_mode: "update"
+          fail_on_high: "false"
+          debug: "false"
