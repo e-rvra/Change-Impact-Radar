@@ -1,0 +1,9 @@
+import { describe, it, expect } from "vitest";
+import { buildDependencyGraph } from "../src/graph";
+
+describe("graph build (smoke)", () => {
+  it("does not crash on empty", () => {
+    const r = buildDependencyGraph({ repoFiles: [], primary: "unknown", maxFiles: 100, debug: false });
+    expect(r.graph.nodes.size).toBe(0);
+  });
+});
