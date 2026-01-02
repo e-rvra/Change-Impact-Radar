@@ -1,0 +1,61 @@
+name: Change Impact Radar
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: change-impact-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  impact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base repo (safe)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      # Si tu veux analyser le contenu exact de la PR (head), dé-commente.
+      # - name: Checkout PR head
+      #   uses: actions/checkout@v4
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.sha }}
+      #     persist-credentials: false
+      #     fetch-depth: 0
+
+      - name: Run Change Impact Radar
+        uses: ./
+        with:
+          max_depth: "3"
+          max_files: "400"
+          include_globs: |
+            **/*.py
+            **/*.js
+            **/*.ts
+            **/*.tsx
+          exclude_globs: |
+            **/*.md
+            **/*.txt
+            **/*.png
+            **/*.jpg
+            **/*.jpeg
+            **/*.webp
+            **/*.svg
+            **/package-lock.json
+            **/yarn.lock
+            **/pnpm-lock.yaml
+          hotspot_paths: |
+            src/
+            lib/
+            core/
+          comment_mode: update
+          fail_on_high: "false"
+          debug: "false"
+
