@@ -1,37 +1,73 @@
 # Change Impact Radar (GitHub Action)
 
-Comments on Pull Requests with an **Impact Score (0–100)** and a 🟢/🟡/🔴 verdict based on **structural amplification vs change size**.
+A **structural change amplification detector** for Pull Requests.
 
-- **Zero config** by default (optional tuning via inputs)
-- Supports **Python** and **JavaScript/TypeScript** repos (best-effort)
-- **No code execution**. Only static parsing of files.
-- Produces a **stable PR comment** (updates the same comment each run)
+Change Impact Radar comments on PRs with an **Impact Score (0–100)** and a 🟢/🟡/🔴 verdict,
+highlighting changes whose **structural impact is disproportionate to their apparent size**.
 
-## What you get (in ~10 seconds)
-A PR comment like:
+It is designed as an **instrument**, not a decision engine.
 
-- Impact Score: X/100 (🟢/🟡/🔴)
-- Amplification Factor (AF)
-- CSS / DRS / HCS sub-scores
-- Top affected files by estimated reach
-- Practical review/testing recommendations (factual, non-alarmist)
+---
+
+## Key Properties
+
+- **Zero-config by default** (uses `GITHUB_TOKEN` automatically)
+- **Static analysis only** — no code execution
+- **Domain-agnostic** (engineering, ML, finance, security, signal, CI)
+- Produces a **stable PR comment** (updated on each run)
+- CI-friendly **outputs** for automation and gating
+- Safe to run on **external Pull Requests (forks)**
+
+---
+
+## What You Get (in ~10 seconds)
+
+A Pull Request comment summarizing:
+
+- **Impact Score** (0–100) with 🟢 / 🟡 / 🔴 verdict
+- **Amplification Factor (AF)**  
+  *(structural reach vs raw change size)*
+- Sub-scores:
+  - CSS — Change Size Score
+  - DRS — Dependency Reach Score
+  - HCS — Hotspot & Coupling Score
+- Top affected files by estimated structural reach
+- Factual, non-alarmist review guidance
+
+This answers one question:
+
+> *Does this change propagate structurally beyond what its size suggests?*
+
+---
 
 ## Usage
 
+### Recommended (safe & production-grade)
+
 ```yaml
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 permissions:
-  pull-requests: write
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: change-impact-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   impact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: your-org/change-impact-radar@v1
+      # Checkout PR code for analysis (read-only)
+      - name: Checkout PR code
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      # Run a trusted, versioned release of the action
+      - name: Change Impact Radar
+        uses: your-org/change-impact-radar@v1
