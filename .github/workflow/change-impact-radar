@@ -16,25 +16,37 @@ jobs:
   impact:
     runs-on: ubuntu-latest
     steps:
-      # 1) Checkout du code de la PR (à analyser), pas du repo "target"
-      - name: Checkout PR code (read-only analysis)
+      - name: Checkout base repo (safe)
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 1
+          persist-credentials: false
+          fetch-depth: 0
 
-      # 2) Exécuter l'action depuis une version taggée (code de confiance)
+      # Si tu veux analyser le contenu exact de la PR (head), dé-commente.
+      # - name: Checkout PR head
+      #   uses: actions/checkout@v4
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.sha }}
+      #     persist-credentials: false
+      #     fetch-depth: 0
+
       - name: Run Change Impact Radar
-        uses: ton-org/change-impact-radar@v1
+        uses: ./
         with:
-          # token optionnel si tu as fait le point 1 (fallback GITHUB_TOKEN)
-          max_depth: 6
-          max_files: 1200
+          max_depth: "3"
+          max_files: "400"
+          include_globs: |
+            **/*.py
+            **/*.js
+            **/*.ts
+            **/*.tsx
           exclude_globs: |
             **/*.md
             **/*.txt
             **/*.png
             **/*.jpg
+            **/*.jpeg
+            **/*.webp
             **/*.svg
             **/package-lock.json
             **/yarn.lock
@@ -46,3 +58,4 @@ jobs:
           comment_mode: update
           fail_on_high: "false"
           debug: "false"
+
