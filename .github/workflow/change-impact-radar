@@ -1,27 +1,48 @@
 name: Change Impact Radar
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 permissions:
-  pull-requests: write
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: change-impact-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   impact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Change Impact Radar
-        uses: ./
+      # 1) Checkout du code de la PR (à analyser), pas du repo "target"
+      - name: Checkout PR code (read-only analysis)
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          max_depth: "4"
-          max_files: "5000"
-          exclude_globs: "node_modules/**,dist/**,build/**,.git/**"
-          hotspot_paths: "src/core,src/backend,lib"
-          comment_mode: "update"
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      # 2) Exécuter l'action depuis une version taggée (code de confiance)
+      - name: Run Change Impact Radar
+        uses: ton-org/change-impact-radar@v1
+        with:
+          # token optionnel si tu as fait le point 1 (fallback GITHUB_TOKEN)
+          max_depth: 6
+          max_files: 1200
+          exclude_globs: |
+            **/*.md
+            **/*.txt
+            **/*.png
+            **/*.jpg
+            **/*.svg
+            **/package-lock.json
+            **/yarn.lock
+            **/pnpm-lock.yaml
+          hotspot_paths: |
+            src/
+            lib/
+            core/
+          comment_mode: update
           fail_on_high: "false"
           debug: "false"
