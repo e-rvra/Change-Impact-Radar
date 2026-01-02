@@ -1,4 +1,4 @@
-# Change Impact Radar (GitHub Actio)
+# Change Impact Radar (GitHub Action)
 
 A **structural change amplification detector** for Pull Requests.
 
@@ -71,4 +71,5 @@ jobs:
       # Run a trusted, versioned release of the action
       - name: Change Impact Radar
         uses: your-org/change-impact-radar@v1
+
 
