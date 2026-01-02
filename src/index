@@ -1,15 +1,29 @@
 import * as core from "@actions/core";
 import { context } from "@actions/github";
-import { getOctokit, ensurePullRequestContext, listPullRequestFiles, getRepoMeta } from "./github";
+import {
+  getOctokit,
+  ensurePullRequestContext,
+  listPullRequestFiles,
+  getRepoMeta,
+} from "./github";
 import { detectPrimaryLanguages, scanRepoFiles } from "./scan";
 import { buildDependencyGraph, GraphBuildResult } from "./graph";
-import { computeScores, formatAmplificationLabel, Verdict } from "./scoring";
+import { computeScores, Verdict } from "./scoring";
 import { upsertPullRequestComment } from "./comment";
 import { clamp, parseCsv, toBool } from "./util";
 
 async function run(): Promise<void> {
   const debug = toBool(core.getInput("debug"));
-  const token = core.getInput("github_token", { required: true });
+
+  // ✅ Token: optional input + fallback to default GITHUB_TOKEN
+  const inputToken = core.getInput("github_token");
+  const token = inputToken || process.env.GITHUB_TOKEN;
+
+  if (!token) {
+    throw new Error(
+      "No GitHub token available. Provide input 'github_token' or ensure 'GITHUB_TOKEN' is set in the environment."
+    );
+  }
 
   const maxDepth = clamp(parseInt(core.getInput("max_depth") || "4", 10) || 4, 1, 12);
   const maxFiles = clamp(parseInt(core.getInput("max_files") || "5000", 10) || 5000, 200, 50000);
@@ -35,7 +49,9 @@ async function run(): Promise<void> {
 
   core.startGroup("Change Impact Radar: Detect languages & scan repo");
   const lang = detectPrimaryLanguages(prFiles);
-  core.info(`Primary language guess: ${lang.primary} (py=${lang.pyCount}, js=${lang.jsCount}, ts=${lang.tsCount})`);
+  core.info(
+    `Primary language guess: ${lang.primary} (py=${lang.pyCount}, js=${lang.jsCount}, ts=${lang.tsCount})`
+  );
 
   // Best-effort repo scan. If it fails, we'll degrade to CSS-only.
   let graphResult: GraphBuildResult | null = null;
@@ -73,7 +89,9 @@ async function run(): Promise<void> {
   });
 
   core.info(
-    `CSS=${scores.CSS} DRS=${scores.DRS} HCS=${scores.HCS} AF=${scores.AF.toFixed(1)} Impact=${scores.ImpactScore} Verdict=${scores.verdict}`
+    `CSS=${scores.CSS} DRS=${scores.DRS} HCS=${scores.HCS} AF=${scores.AF.toFixed(
+      1
+    )} Impact=${scores.ImpactScore} Verdict=${scores.verdict}`
   );
   core.endGroup();
 
