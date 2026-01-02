@@ -1,5 +1,10 @@
 # Change Impact Radar (GitHub Action)
 
+![Change Impact Radar](https://github.com/e-rvra/Change-Impact-Radar/actions/workflows/change-impact-radar.yml/badge.svg)
+![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Change%20Impact%20Radar-blue?logo=github)
+![License](https://img.shields.io/github/license/e-rvra/Change-Impact-Radar)
+![Node](https://img.shields.io/badge/node-20.x-green?logo=node.js)
+
 A **structural change amplification detector** for Pull Requests.
 
 Change Impact Radar comments on PRs with an **Impact Score (0–100)** and a 🟢/🟡/🔴 verdict,
@@ -71,5 +76,6 @@ jobs:
       # Run a trusted, versioned release of the action
       - name: Change Impact Radar
         uses: your-org/change-impact-radar@v1
+
 
 
